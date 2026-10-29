@@ -1,0 +1,3 @@
+2026-09-27 17:58:47.589048-03:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "ERROS_TRADUZIDOS" not found; SQL statement:
+INSERT INTO erros_traduzidos (codigo_erro, campo, mensagem_pva, mensagem_traduzida, orientacao_correcao) VALUES ( 'UN', 'UNID', 'Cadastro de Unidade de Medida não encontrado no arquivo.', 'A unidade de medida informada nos itens da nota não está cadastrada na tabela de unidades do sistema fiscal.', '1. Verifique no sistema Fiscal se a sigla da unidade de medida está cadastrada igual ao ControlGás (se não existir, crie).\n2. Adicione uma Unidade Tributável no cadastro da unidade (pode ter o mesmo nome/sigla).\n3. Reเกer/reexporte o arquivo SPED.' ) [42102-240]

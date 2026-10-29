@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validador SPED - Tradutor de Erros</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f4f6f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .navbar {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        }
+        .card-upload {
+            border: 2px dashed #0d6efd;
+            border-radius: 12px;
+            background-color: #f8f9fa;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .card-upload:hover {
+            background-color: #e9ecef;
+            border-color: #0b5ed7;
+        }
+        .result-card {
+            border-left: 4px solid #0d6efd;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .nav-pills .nav-link.active {
+            background-color: #1e3c72;
+        }
+        .nav-pills .nav-link {
+            color: #495057;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header / Navbar -->
+    <nav class="navbar navbar-dark mb-4 shadow-sm">
+        <div class="container">
+            <span class="navbar-brand mb-0 h1">
+                <i class="bi bi-file-earmark-text-fill me-2"></i>
+                Validador SPED &mdash; Tradutor de Erros
+            </span>
+        </div>
+    </nav>
+
+    <div class="container pb-5">
+        
+        <!-- Hero / Orientação -->
+        <div class="row mb-4">
+            <div class="col-12 text-center">
+                <h2 class="fw-bold text-dark">Otimização do Suporte Técnico Fiscal</h2>
+                <p class="text-muted">Traduza as mensagens do PVA em orientações claras via importação de arquivo ou busca manual.</p>
+            </div>
+        </div>
+
+        <!-- Abas de Navegação (Upload x Pesquisa Manual) -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-md-8">
+                <ul class="nav nav-pills nav-justified bg-white p-2 rounded shadow-sm" id="pills-tab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="pills-upload-tab" data-bs-toggle="pill" data-bs-target="#pills-upload" type="button" role="tab">
+                            <i class="bi bi-cloud-upload me-2"></i>Importar Arquivo SPED
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="pills-busca-tab" data-bs-toggle="pill" data-bs-target="#pills-busca" type="button" role="tab">
+                            <i class="bi bi-search me-2"></i>Pesquisar Erro Manualmente
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Conteúdo das Abas -->
+        <div class="tab-content" id="pills-tabContent">
+            
+            <!-- ABA 1: UPLOAD DE ARQUIVO -->
+            <div class="tab-pane fade show active" id="pills-upload" role="tabpanel">
+                <div class="row justify-content-center mb-4">
+                    <div class="col-md-8">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-body p-4 text-center">
+                                <form id="uploadForm">
+                                    <div class="card-upload p-4 mb-3" onclick="document.getElementById('arquivoSped').click()">
+                                        <i class="bi bi-cloud-arrow-up-fill text-primary display-4 mb-2 d-block"></i>
+                                        <h5 class="fw-bold mb-1">Selecione ou arraste o arquivo SPED</h5>
+                                        <p class="text-muted small mb-0">Formatos suportados: <code>.txt</code></p>
+                                        <span id="nomeArquivoSelecionado" class="badge bg-secondary mt-2 d-none"></span>
+                                    </div>
+                                    <input type="file" id="arquivoSped" accept=".txt" class="d-none" onchange="atualizarNomeArquivo(this)">
+                                    <button type="button" class="btn btn-primary btn-lg w-100 fw-bold shadow-sm" onclick="enviarArquivo()">
+                                        <i class="bi bi-file-earmark-check me-2"></i> Analisar Arquivo SPED
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ABA 2: PESQUISA MANUAL DE ERROS -->
+            <div class="tab-pane fade" id="pills-busca" role="tabpanel">
+                <div class="row justify-content-center mb-4">
+                    <div class="col-md-8">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-body p-4">
+                                <h5 class="fw-bold mb-3"><i class="bi bi-search text-primary me-2"></i>Consulta por Código ou Registro</h5>
+                                <div class="input-group mb-3">
+                                    <input type="text" id="codigoPesquisa" class="form-control form-control-lg" placeholder="Ex: 0000, C100, COD_CTA..." onkeypress="if(event.key === 'Enter') pesquisarErroManual()">
+                                    <button class="btn btn-primary px-4 fw-bold" type="button" onclick="pesquisarErroManual()">
+                                        Pesquisar
+                                    </button>
+                                </div>
+                                <small class="text-muted">Digite o código do bloco, campo ou registro para buscar a solução na base de dados.</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Status de Carregamento -->
+        <div id="loading" class="text-center d-none my-4">
+            <div class="spinner-border text-primary mb-2" role="status"></div>
+            <p class="text-muted">Consultando a base de conhecimento fiscal...</p>
+        </div>
+
+        <!-- Área de Resultados -->
+        <div id="resultadoContainer" class="row justify-content-center d-none">
+            <div class="col-md-10">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="fw-bold text-dark mb-0"><i class="bi bi-list-check me-2"></i>Resultados Encontrados</h4>
+                    <span id="totalItens" class="badge bg-primary rounded-pill">0 itens</span>
+                </div>
+                <div id="listaResultados" class="d-flex flex-column gap-3"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function atualizarNomeArquivo(input) {
+            const badge = document.getElementById('nomeArquivoSelecionado');
+            if (input.files && input.files[0]) {
+                badge.textContent = input.files[0].name;
+                badge.classList.remove('d-none');
+            } else {
+                badge.classList.add('d-none');
+            }
+        }
+
+        // --- Rotina 1: Upload do Arquivo SPED ---
+        async function enviarArquivo() {
+            const fileInput = document.getElementById('arquivoSped');
+            const loading = document.getElementById('loading');
+            const resultadoContainer = document.getElementById('resultadoContainer');
+            const listaResultados = document.getElementById('listaResultados');
+
+            if (!fileInput.files[0]) {
+                alert("Por favor, selecione um arquivo SPED.");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+
+            loading.classList.remove('d-none');
+            resultadoContainer.classList.add('d-none');
+            listaResultados.innerHTML = "";
+
+            try {
+                const response = await fetch('/api/sped/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                exibirResultados(response.ok, data);
+
+            } catch (error) {
+                loading.classList.add('d-none');
+                resultadoContainer.classList.remove('d-none');
+                listaResultados.innerHTML = `
+                    <div class="alert alert-danger border-0 shadow-sm">
+                        <i class="bi bi-exclamation-octagon me-2"></i> Falha de comunicação com o servidor backend.
+                    </div>`;
+            }
+        }
+
+        // --- Rotina 2: Pesquisa Manual de Erros ---
+        async function pesquisarErroManual() {
+            const codigo = document.getElementById('codigoPesquisa').value.trim();
+            const loading = document.getElementById('loading');
+            const resultadoContainer = document.getElementById('resultadoContainer');
+            const listaResultados = document.getElementById('listaResultados');
+
+            if (!codigo) {
+                alert("Por favor, digite um código ou termo para pesquisar.");
+                return;
+            }
+
+            loading.classList.remove('d-none');
+            resultadoContainer.classList.add('d-none');
+            listaResultados.innerHTML = "";
+
+            try {
+                const response = await fetch(`/api/sped/pesquisar?codigo=${encodeURIComponent(codigo)}`);
+                const data = await response.json();
+                exibirResultados(response.ok, data);
+
+            } catch (error) {
+                loading.classList.add('d-none');
+                resultadoContainer.classList.remove('d-none');
+                listaResultados.innerHTML = `
+                    <div class="alert alert-danger border-0 shadow-sm">
+                        <i class="bi bi-exclamation-octagon me-2"></i> Erro ao realizar a busca manual.
+                    </div>`;
+            }
+        }
+
+        // --- Renderização de Resultados ---
+        function exibirResultados(sucesso, data) {
+            const loading = document.getElementById('loading');
+            const resultadoContainer = document.getElementById('resultadoContainer');
+            const listaResultados = document.getElementById('listaResultados');
+            const totalItens = document.getElementById('totalItens');
+
+            loading.classList.add('d-none');
+            resultadoContainer.classList.remove('d-none');
+            listaResultados.innerHTML = "";
+
+            if (sucesso) {
+                if (Array.isArray(data) && data.length > 0) {
+                    totalItens.textContent = `${data.length} registro(s)`;
+                    
+                    data.forEach(item => {
+                        const card = document.createElement('div');
+                        card.className = 'card result-card p-3 border-0 bg-white shadow-sm';
+                        
+                        let conteudoHtml = "";
+
+                        if (typeof item === 'object' && item !== null) {
+                            // Badges de linha e registro (presentes no DTO de upload)
+                            let headerBadges = '';
+                            if (item.numeroLinha) {
+                                headerBadges += `<span class="badge bg-dark me-1">Linha ${item.numeroLinha}</span>`;
+                            }
+                            if (item.codigoRegistro) {
+                                headerBadges += `<span class="badge bg-primary me-1">${item.codigoRegistro}</span>`;
+                            }
+
+                            conteudoHtml = `
+                                ${headerBadges ? `<div class="mb-2">${headerBadges}</div>` : ''}
+                                <strong>Código do Erro:</strong> ${item.codigoErro || 'N/A'} <br>
+                                <strong>Campo:</strong> ${item.campo || 'N/A'} <br>
+                                <strong>Mensagem PVA:</strong> ${item.mensagemPva || 'N/A'} <br>
+                                <strong>Tradução:</strong> ${item.mensagemTraduzida || 'N/A'} <br>
+                                <hr class="my-2">
+                                <span class="text-primary"><strong>Orientação de Correção:</strong> ${item.orientacaoCorrecao || 'N/A'}</span>
+                            `;
+                        } else {
+                            conteudoHtml = item;
+                        }
+
+                        card.innerHTML = `
+                            <div class="d-flex align-items-start gap-2">
+                                <i class="bi bi-info-circle-fill text-primary fs-5 mt-1"></i>
+                                <div>
+                                    <p class="mb-0 text-dark">${conteudoHtml}</p>
+                                </div>
+                            </div>
+                        `;
+                        listaResultados.appendChild(card);
+                    });
+                } else {
+                    totalItens.textContent = "0 registros";
+                    let mensagem = (Array.isArray(data) && data.length === 0)
+                        ? 'Nenhum erro correspondente foi encontrado na base de dados.'
+                        : (typeof data === 'string' ? data : 'Nenhum erro correspondente foi encontrado na base de dados.');
+                    listaResultados.innerHTML = `
+                        <div class="alert alert-info border-0 shadow-sm mb-0">
+                            <i class="bi bi-info-circle me-2"></i> ${mensagem}
+                        </div>`;
+                }
+            } else {
+                totalItens.textContent = "0 registros";
+                let mensagemErro = typeof data === 'object'
+                    ? (data.message || data.erro || JSON.stringify(data))
+                    : data;
+                listaResultados.innerHTML = `
+                    <div class="alert alert-danger border-0 shadow-sm mb-0">
+                        <i class="bi bi-exclamation-triangle me-2"></i> ${mensagemErro}
+                    </div>`;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,3 @@
+|0000|0|01012026|31012026|EMPRESA TESTE|
+|UN|UNID|Unidade de Medida|
+|COD_CTA|0500|Conta contabil|
